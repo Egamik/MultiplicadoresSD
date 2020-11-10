@@ -6,7 +6,7 @@ port (clk, rst, init: in std_logic;
 		Az, Bz, contz, Azero: in std_logic;
 		mPH, mcont : out std_logic; -- Sinais dos mux
 		cA, cB, ccont, cmult: out std_logic; -- sinais dos registradores
-		srP, cPH, srPL, cPL: out std_logic
+		srAA, srP, cPH, srPL, cPL: out std_logic -- 
 		);
 end entity;
 
@@ -64,20 +64,34 @@ begin
 				cB <= '1';
 				ccont <= '1';
 				mcont <= '1';
-				-- Falta registradores P
+				mPH <= '1';
+				cPH <= '1';
+				srPH <= '0';
 			when s2 =>
-				cA <= '1';
-				cB <= '1';
-				ccont <= '1';
-				mcont <= '1';
-				-- Falta registradores P
-			when s3 =>
 				cA <= '0';
 				cB <= '0';
 				ccont <= '0';
-			when s4
-			when s5
-			when s6
+				mcont <= '0';
+			when s3 =>
+				cA <= '0';
+				cPH <= '0';
+				cPL <= '0';
+				srPL <= '0';
+				srPH <= '0';
+				srAA <= '0';
+				ccont <= '0';
+			when s4 =>
+				cPH <= '1';
+				srPH <= '0';
+				mPH <= '0';
+			when s5 =>
+				srPL <= '1';
+				cPL <= '1';
+				srAA <= '1';
+				mcont <= '0';
+				ccont <= '1';
+			when s6 =>
+				cmult <= '1';
 			end case;
 	end process;		
 end behav;
