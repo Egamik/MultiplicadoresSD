@@ -6,20 +6,23 @@ port (clk, rst, init: in std_logic;
 		Az, Bz, contz, Azero: in std_logic;
 		mPH, mcont : out std_logic; -- Sinais dos mux
 		cA, cB, ccont, cmult: out std_logic; -- sinais dos registradores
-		srAA, srP, cPH, srPL, cPL: out std_logic -- 
+		srAA, srPH, cPH, srPL, cPL: out std_logic;
+		pronto: out std_logic
 		);
 end entity;
 
 architecture behav of fsm is
+
 type state is (s0, s1, s2, s3, s4, s5, s6);
 signal current_state : state;
+
 begin
 	process(clk, rst)
-	begin
+		begin
 		if (rst = '1') then 
 			current_state <= s0;
 		elsif (clk'event and clk = '1') then
-			case state is
+			case current_state is
 				when s0 =>
 					if (init = '1') then
 						current_state <= s1;
@@ -29,12 +32,13 @@ begin
 				when s1 =>
 					current_state <= s2;
 				when s2 =>
-					if (Az or Bz) then 
+					if (Az = '1' or Bz = '1') then 
 						current_state <= s6;
 					else 
 						current_state <= s3;
+					end if;	
 				when s3 =>
-					if (contz = '1') then
+					if contz = '1' then
 						current_state <= s6;
 					elsif (contz = '0' and azero = '1') then
 						current_state <= s4;
@@ -50,6 +54,7 @@ begin
 				end case;	
 		end if;
 	end process;
+	
 	process(current_state)
 	begin
 		case current_state is
