@@ -6,11 +6,8 @@ use ieee.std_logic_unsigned.all;
 entity bo is
 generic(N: natural := 8);
 port (clkbo : in std_logic; -- Clock.
-
       entA, entB : in std_logic_vector(N-1 downto 0); -- Operandos.
-		
-      SeAezero, SeBezero : in std_logic; -- Sinais de controle.
-		m1,m2,mPH,mff : in std_logic; -- Sinais de controle dos muxs , demux e Cin.
+		m1,m2,mPH2,mff : in std_logic; -- Sinais de controle dos muxs , demux e Cin.
 		CPH,CPL,CB,CA,Ccount,Csaida : in std_logic; -- Sinais de carga dos registradores.
 		ShPH,ShPL,ShA : in std_logic; -- Sinais de shift dos registradores.
 		Azero,Bzero,Countzero,AlessSig : out std_logic;
@@ -30,7 +27,7 @@ end component;
 component registrador_sh is -- Reg com shift.
 generic(N: natural := 8);
 port (clk, carga , darshift : in std_logic;
-	  d : in std_logic_vector(N-1 downto 0);
+	  d : in unsigned(N-1 downto 0);
 	  q : out std_logic_vector(N-1 downto 0));
 end component;
 
@@ -81,15 +78,15 @@ Somador : somadorComCin generic map (N) port map (A => saidamuxPH, B => saidamux
 demux1 : demux1para2 generic map (N) port map (d => SaidaSomador, sel => m1, s1 => SaidaS1demux, s2 => SaidaS2demux);
 muxCount : mux2para1T1 generic map (N/2) port map (a => "0100" , b => SaidaS2demux(3 downto 0) , sel => m2, Y => SaidaMuxCount);
 muxCout : mux2para1T1 generic map (1) port map (a => sinalCout, b => "0" , sel => mff, y => sinalFF );
-muxPH2 : mux2para1T1 generic map(N) port map (a => SaidaS1demux , b => "00000000" , sel => mPH , y => saidaMuxPH2);
+muxPH2 : mux2para1T1 generic map(N) port map (a => SaidaS1demux , b => "00000000" , sel => mPH2 , y => saidaMuxPH2);
 muxPH : mux2para1T1 generic map(N) port map (a => SaidaregPH, b => "11111110" , sel => m1 , y => saidamuxPH);
 muxB : mux2para1T1 generic map(N) port map (a => SaidaregB, b => "0000" & SaidaregCount  , sel => m1, y => saidamuxB);
 regCount : registrador generic map(4) port map (clk => clkbo, carga => Ccount, d => SaidaMuxCount , q => SaidaregCount);
 regB : registrador generic map(8) port map (clk => clkbo, carga => CB, d => entB , q => SaidaregB);
 regSaida : registrador generic map(16) port map (clk => clkbo, carga => Csaida, d => SaidaregPH & SaidaregPL , q => Saida);
-regA : registrador_sh generic map(8) port map (clk => clkbo, carga => CA, darshift => sHA, d => entA , q => SaidaregA);
-regPH : registrador_sh generic map(8) port map (clk => clkbo, carga => CPH, darshift => ShPH, d => (BitPH & SaidamuxPH2(6 downto 0)), q => SaidaregPH);
-regPL : registrador_sh generic map(8) port map (clk => clkbo, carga => CPL, darshift => ShPL, d => EntradaDPLparaReset, q => SaidaregPL);
+regA : registrador_sh generic map(8) port map (clk => clkbo, carga => CA, darshift => sHA, d => unsigned(entA) , q => SaidaregA);
+regPH : registrador_sh generic map(8) port map (clk => clkbo, carga => CPH, darshift => ShPH, d => unsigned(BitPH & SaidamuxPH2(6 downto 0)), q => SaidaregPH);
+regPL : registrador_sh generic map(8) port map (clk => clkbo, carga => CPL, darshift => ShPL, d => unsigned(EntradaDPLparaReset), q => SaidaregPL);
 A_IgualAzero : igualazero_AB generic map(8) port map (entrada => entA, saida => Azero);
 B_IgualAzero : igualazero_AB generic map(8) port map (entrada => entB, saida => Bzero);
 Count_IgualAzero : igualazero_AB generic map(4) port map (entrada => saidaregCount, saida => Countzero);
