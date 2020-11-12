@@ -61,7 +61,7 @@ begin
 			when s0 =>
 				  m1     <= '0';
 				  m2     <= '0';
-              mPH2    <= '0';
+              mPH2   <= '0';
               mff    <= '0';
               CPH    <= '0';
               CPL    <= '0';
@@ -76,10 +76,10 @@ begin
 			when s1 =>
 				  m1     <= '0';
 				  m2     <= '0'; -- sel n (num de bits do multiplicando.
-              mPH2    <= '1'; -- sel zero.
+              mPH2   <= '1'; -- sel zero.
               mff    <= '0';
-              CPH    <= '0';
-              CPL    <= '0';
+              CPH    <= '1'; -- Carrega PH com zeros (limpa PH antes de começar).
+              CPL    <= '1'; -- reseta PL.
               CB     <= '1'; -- entB <= B.
               CA     <= '1'; -- entA <= A.
               Ccount <= '1'; -- carrega n no reg Count.
@@ -88,8 +88,8 @@ begin
               ShPL   <= '0';
               ShA    <= '0';
               pronto <= '0';
-			when s2 =>
-				  m1     <= '0';
+			when s2 =>              -- A e B ja estao prontos para serem consultados.
+				  m1     <= '0';       -- sao precisa carregar para ler.
 				  m2     <= '0';
               mPH2   <= '0';
               mff    <= '0';
@@ -104,6 +104,10 @@ begin
               ShA    <= '0';
               pronto <= '0';
 			when s3 =>
+			     m1     <= '0';
+				  m2     <= '0';
+              mPH2   <= '0';
+              mff    <= '0';				  
               CPH    <= '0';
               CPL    <= '0';
               CB     <= '0';
@@ -115,34 +119,53 @@ begin
               ShA    <= '0';
               pronto <= '0';
 			when s4 =>
-				  m1     <= '0'; -- sel B , s1 do demux , saida do PH no somador.
+				  m1     <= '0'; -- Para fazer a soma com B
               mPH2   <= '0'; -- sel , s1 do demux.
-              mff    <= '0'; -- 
-              CPH    <= '1'; -- carrega PH.
+              mff    <= '0'; -- deve ser 0, p/ pegar cout pois a soma esta sendo feita.
+              CPH    <= '1'; -- PH é carregado na transição de s4 para s5 com o valor da soma. 
               CPL    <= '0';
               CB     <= '0';
               CA     <= '0';
               Ccount <= '0';
               Csaida <= '0';
-              ShPH   <= '1'; -- desloga PH.
-              ShPL   <= '1'; -- desloga PL.
+              ShPH   <= '0'; 
+              ShPL   <= '0'; 
               ShA    <= '0';
               pronto <= '0';
 			when s5 =>
-				  m1     <= '1'; -- sel entrada do count.
-				  m2     <= '1'; -- s2 do demux.
+				  m1     <= '1'; -- libera caminho para a subtração e entra em Cin.
+				  m2     <= '1'; -- libera caminho para a subtração.
+				  mPH2   <= '0';
+				  
               CPH    <= '0'; 
               CPL    <= '0';
               CB     <= '0'; 
-              CA     <= '1'; -- carrega A.
-              Ccount <= '1'; -- carrega Count com novo valor de i.
+              CA     <= '0'; 
+              Ccount <= '1'; -- carrega o resultado da subtração na transição de s5 p/ s3 ou s6
+              Csaida <= '0';
+				  
+				  mff    <= '1'; -- so deve ser 1 no estado s5.
+              ShPH   <= '1'; -- deslogo o PH para direita. 
+              ShPL   <= '1'; -- deslogo o PL para direita.
+				  
+              ShA    <= '1'; -- deslogo A para ver o prox bit de A.
+              pronto <= '0';
+			when s6 =>
+				  m1     <= '0';
+				  m2     <= '0';
+              mPH2   <= '0';
+              mff    <= '0';				  
+              CPH    <= '0';
+              CPL    <= '0';
+              CB     <= '0';
+              CA     <= '0';
+              Ccount <= '0';
               Csaida <= '0';
               ShPH   <= '0';
               ShPL   <= '0';
-              ShA    <= '1'; -- desloca A.
+              ShA    <= '0';
               pronto <= '0';
-			when s6 =>
-              Csaida <= '0';
+              Csaida <= '1'; -- carrega reg saida.
 			end case;
 	end process;		
 end comportamento;
